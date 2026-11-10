@@ -47,7 +47,7 @@ struct SettingsView: View {
 				
 				Section {
 					Button("Save Settings") {
-						vm.persist()
+						save()
 						dismiss()
 					}
 					Button("Reset Table") { vm.engine.resetTable() }
@@ -55,13 +55,21 @@ struct SettingsView: View {
 				}
 			}
 			.navigationTitle("Settings")
-			.toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { vm.persist(); dismiss() } } }
+            .onChange(of: vm.engine.rules.decks) { _, _ in vm.engine.newShoe() }
+            .onDisappear { save() }
+			.toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { save(); dismiss() } } }
 		}
 #if os(macOS)
 		.frame(minWidth: 500, minHeight: 600)
 #endif
 	}
 	
+    private func save() {
+        vm.baseBet = min(1000, max(10, vm.baseBet / 10 * 10))
+        vm.engine.bankroll.balance = max(0, vm.engine.bankroll.balance)
+        vm.persist()
+    }
+
 	var rulesPanel: some View {
 		DisclosureGroup("Rules") {
 			VStack(alignment: .leading, spacing: 8) {

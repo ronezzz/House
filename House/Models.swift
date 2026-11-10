@@ -41,10 +41,11 @@ public struct Card: Identifiable, Hashable, Codable {
 
 struct Shoe: Codable {
     private(set) var cards: [Card] = []
+    private(set) var initialCardCount: Int = 0
     
     init(decks: Int, shuffleTimes: Int = 6) {
         var temp: [Card] = []
-        for _ in 0..<decks {
+        for _ in 0..<max(1, decks) {
             for s in Suit.allCases {
                 // Standard 52-card mapping: four tens + J/Q/K as 10
                 temp.append(contentsOf: [
@@ -66,11 +67,18 @@ struct Shoe: Codable {
         }
         // Fisher-Yates multiple shuffles
         cards = temp
-        for _ in 0..<shuffleTimes { cards.shuffle() }
+        initialCardCount = cards.count
+        for _ in 0..<max(0, shuffleTimes) { cards.shuffle() }
     }
     
+    /// Cards are consumed in the supplied order, for deterministic scenarios and tests.
+    init(drawOrder: [Card]) {
+        cards = Array(drawOrder.reversed())
+        initialCardCount = cards.count
+    }
+
     mutating func draw() -> Card? { cards.popLast() }
-    var penetration: Double { 1.0 - Double(cards.count)/Double(max(cards.capacity, 1)) }
+    var penetration: Double { 1.0 - Double(cards.count)/Double(max(initialCardCount, 1)) }
 }
 
 // MARK: - Bankroll

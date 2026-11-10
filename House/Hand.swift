@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Observation
 
 enum HandState: String, Codable, Equatable {
 	case playing, stood, busted, blackjack, doubled, surrendered, resolved
@@ -42,7 +43,7 @@ struct Hand: Identifiable, Codable, Hashable {
 		return (sum, soft)
 	}
 	
-	var isBlackjack: Bool { cards.count == 2 && total.hard == 21 }
+	var isBlackjack: Bool { !isSplitChild && cards.count == 2 && total.hard == 21 }
 	var isBusted: Bool { total.hard > 21 }
 }
 

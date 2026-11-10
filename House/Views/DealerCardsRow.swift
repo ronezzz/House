@@ -18,13 +18,13 @@ public struct DealerCardsRow: View {
 	}
 	
 	public var body: some View {
-		let holeId: UUID? = cards.first?.id
+		let holeId: UUID? = cards.dropFirst().first?.id
 		let shouldStack = !dealerShouldSpread || cards.count <= 2
 		let baseSpacing: CGFloat = 8
 		
 		HStack(spacing: baseSpacing) {
 			ForEach(Array(cards.enumerated()), id: \.element.id) { idx, card in
-				let alpha = destinationOpacity(card.id, shouldStack: shouldStack)
+				let alpha = destinationOpacity(card.id)
 				let content: AnyView = {
 					if card.id == holeId {
 						return AnyView(
@@ -49,7 +49,7 @@ public struct DealerCardsRow: View {
 				}()
 				
 				content
-					.offset(x: overlapOffset(idx))            // create stacked look before dealer draws
+					.offset(x: overlapOffset(idx, shouldStack: shouldStack))            // create stacked look before dealer draws
 					.zIndex(Double(idx))                      // ensure rightmost card appears on top
 			}
 		}

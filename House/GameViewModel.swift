@@ -25,7 +25,7 @@ final class GameViewModel {
         let savedBet = UserDefaults.standard.integer(forKey: "baseBet")
         let savedShowCount = UserDefaults.standard.object(forKey: "showCount") as? Bool
 
-        var rules = BlackjackRules()
+        var rules = UserDefaults.standard.data(forKey: "houseRules").flatMap { try? JSONDecoder().decode(BlackjackRules.self, from: $0) } ?? BlackjackRules()
         if let payout = UserDefaults.standard.string(forKey: "bjPayout"),
            payout == "6:5" {
             rules.blackjackPayout = .init(num: 6, den: 5)
@@ -33,13 +33,14 @@ final class GameViewModel {
 
         engine = GameEngine(
             rules: rules,
-            initialBankroll: savedBankroll > 0 ? savedBankroll : 1000
+            initialBankroll: UserDefaults.standard.object(forKey: "bankroll") == nil ? 1000 : max(0, savedBankroll)
         )
-        baseBet = max(savedBet, 10)
+        baseBet = min(1000, max(10, savedBet / 10 * 10))
         showCount = savedShowCount ?? true
     }
 
     func persist() {
+        UserDefaults.standard.set(try? JSONEncoder().encode(engine.rules), forKey: "houseRules")
         UserDefaults.standard.set(engine.bankroll.balance, forKey: "bankroll")
         UserDefaults.standard.set(baseBet, forKey: "baseBet")
         let tag = "\(engine.rules.blackjackPayout.num):\(engine.rules.blackjackPayout.den)"
