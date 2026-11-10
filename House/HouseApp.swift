@@ -91,6 +91,9 @@ struct TableView: View {
                     .frame(maxWidth: .infinity)
             }.background(felt).foregroundStyle(.white)
                 .navigationTitle("House")
+#if os(iOS)
+                .toolbarColorScheme(.dark, for: .navigationBar)
+#endif
                 .toolbar {
                     Button("Settings", systemImage: "slider.horizontal.3") { settings = true }
                         .disabled(!vm.engine.roundOver)
